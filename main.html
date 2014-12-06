@@ -1,41 +1,120 @@
-
-<html>
+<!doctype html>
+<html lang="en" class="no-js">
 <head>
 	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
 
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"> -->
 
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"> -->
 
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> -->
 
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcdz_SHfTkyHsts32rtVXPMCswNnat6Eg"></script>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="style.css"> <!-- Resource style -->
+
 	<style>
       #map-canvas {
         height: 80%;
         margin: 0px;
         padding: 0px
       }
+
+      #day-summary {
+      	margin-bottom: 500px;
+      }
     </style>
 </head>
 
 <body>
-	<h1 id="demo">Arthury</h1>
 	
-	<button type="button" class="btn btn-primary" onclick="setCenter();">Set Center!</button>
+	<select id="month">
+	  <option value="0">January</option>
+	  <option value="1">February</option>
+	  <option value="2">March</option>
+	  <option value="3">April</option>
+	  <option value="4">May</option>
+	  <option value="5">June</option>
+	  <option value="6">July</option>
+	  <option value="7">August</option>
+	  <option value="8">September</option>
+	  <option value="9">October</option>
+	  <option value="10">November</option>
+	  <option value="11" selected="selected">December</option>
+	</select>
+
+	<input id="day" type="text" placeholder="Enter Date" />
+	<button type="button" class="btn btn-primary" onclick="updateDate();">Update Date</button>
+	
+	<div id="day-summary">
+		<section id="cd-timeline" class="cd-container">
+			
+
+			<div class="cd-timeline-block">
+				<div class="cd-timeline-img cd-picture">
+					<img src="img/cd-icon-picture.svg" alt="Picture">
+				</div> <!-- cd-timeline-img -->
+
+				<div class="cd-timeline-content">
+					<h2>Title of section 1</h2>
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
+					<a href="#0" class="cd-read-more">Read more</a>
+					<span class="cd-date">Jan 14<img src="https://maps.googleapis.com/maps/api/staticmap?center=40.755088, -73.994789&zoom=12&size=300x250&markers=color:red%7Clabel:---%7C40.755088, -73.994789" /></span>
+
+				</div> <!-- cd-timeline-content -->
+			</div> <!-- cd-timeline-block -->
+
+			<div class="cd-timeline-block">
+				<div class="cd-timeline-img cd-movie">
+					<img src="img/cd-icon-movie.svg" alt="Movie">
+				</div> <!-- cd-timeline-img -->
+
+				<div class="cd-timeline-content">
+					<h2>Title of section 2</h2>
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde?</p>
+					<a href="#0" class="cd-read-more">Read more</a>
+					<span class="cd-date">Jan 18<img src="https://maps.googleapis.com/maps/api/staticmap?center=40.755088, -73.994789&zoom=12&size=300x250&markers=color:red%7Clabel:---%7C40.755088, -73.994789" /></span>
+				</div> <!-- cd-timeline-content -->
+			</div> <!-- cd-timeline-block -->		
+
+
+		</section> <!-- cd-timeline -->
+
+	</div> <!-- day-summary -->
+
+	
+
+	<h1 id="demo"></h1>
+	<button type="button" class="btn btn-primary" onclick="setCenter();">Set Center</button>
+	<button type="button" class="btn btn-primary" onclick="setMarker();">Set Marker</button>
 	<div id="map-canvas"></div>
+
+	
+
+	
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="main.js"></script> <!-- Resource jQuery -->
 </body>
 
 <script type="text/javascript">
+	
+	//locationData[(LAT/LNG)] = {Name:STRING,Start:TIMESTAMP,End:TIMESTAMP}
+
 	var x = document.getElementById("demo");
 	var currPos;
 	var map;
+	var locations;
+	var events = [];
 
 	function getLocation() {
 	    if (navigator.geolocation) {
@@ -67,13 +146,111 @@
       function setCenter() {
       	map.setCenter(currPos);
       }
-      
-      
 
+      function setMarker() {
+      	var marker = new google.maps.Marker({
+	      position: currPos,
+	      map: map
+	    });
+      }
+      
+      
+		function Location(name,lat,lng) {
+			this.name = name;
+			this.lat = lat;
+			this.lng = lng;
+
+			/*this.timestamps = [];
+
+			this.addTimestamps = function(start,end) {
+				this.timestamps.push({start:start,end:end});
+			}; */
+		}
+
+		function Event(location,start,stop) {
+			this.location = location;
+			this.start = start;
+			this.stop = stop;
+
+		}
+		
+		function addFakeData(){
+			pivotal = new Location("Pivotal Labs", 40.7398987,-73.99507460000001);
+			empire = new Location("Empire State Building", 40.748659, -73.985626);
+			home = new Location("Home",40.755088, -73.994789);
+			vip = new Location("The VIP Club New York", 40.748659, -73.985626);
+			brass = new Location("Brass Monkey", 40.740997, -74.008472);
+
+			locations = [pivotal,empire,home,vip,brass];
+
+			events.push(new Event(home,new Date("Dec 1, 2014 00:00:00"),new Date("Dec 1, 2014 8:00:00")));
+			events.push(new Event(pivotal,new Date("Dec 1, 2014 08:00:00"),new Date("Dec 1, 2014 12:00:00")));
+			events.push(new Event(empire,new Date("Dec 1, 2014 12:00:00"),new Date("Dec 1, 2014 15:00:00")));
+			events.push(new Event(vip,new Date("Dec 1, 2014 15:00:00"),new Date("Dec 1, 2014 18:00:00")));
+			events.push(new Event(brass,new Date("Dec 2, 2014 18:00:00"),new Date("Dec 2, 2014 24:00:00")));
+			
+		}
+
+		addFakeData();
+		
+
+
+		//sort all of the data for one day in chronological order and display it
+
+
+		//Add a static map to the timeline row
+		function staticMap(lat,lng){
+			// <img src="https://maps.googleapis.com/maps/api/staticmap?center=40.755088, -73.994789&zoom=12&size=300x250&markers=color:red%7Clabel:---%7C40.755088, -73.994789" />
+
+			return '<img src="https://maps.googleapis.com/maps/api/staticmap?center=' + lat + ',' + lng + '&zoom=12&size=300x250&markers=color:red%7Clabel:---%7C' + lat + ',' + lng + '" />';
+		}
+
+		//Add the event to the timeline
+		function addEvent(event) {
+
+			var block = '<div class="cd-timeline-block"> \
+				<div class="cd-timeline-img cd-picture"> \
+					<img src="img/cd-icon-picture.svg" alt="Picture"> \
+				</div>  \
+				<div class="cd-timeline-content">' + 
+					'<h2>' + event.location.name + '</h2> \
+					<p>Paragraph details</p> \
+					<a href="#0" class="cd-read-more">Read more</a> \
+					<span class="cd-date">' + event.start + '<img src="https://maps.googleapis.com/maps/api/staticmap?center=' + event.location.lat + ',' + event.location.lng + '&zoom=12&size=300x250&markers=color:red%7Clabel:---%7C' + event.location.lat + ',' + event.location.lng + '" /></span> \
+				</div>\
+			</div>'
+
+
+			$("#cd-timeline").append(block);
+		}
+		
+		function updateDate(){
+			var selectedDate = new Date(2014,parseInt($("#month").val()),parseInt($("#day").val()));
+			
+			var selectedEvents = getEvents(selectedDate);
+
+			$("#cd-timeline").empty();
+			$.each(selectedEvents, function(index,event) {
+				addEvent(event);
+			});
+		}
+
+		function getEvents(day) {
+			var selectedEvents = [];
+			
+			$.each(events, function(index,event){
+				if (event.start.setHours(0,0,0,0) == day.setHours(0,0,0,0)) {
+					selectedEvents.push(event);
+				}
+			});	
+
+			return selectedEvents;
+		}
+		
 </script>
 
 
-</head>
+
 
 </html>
 
